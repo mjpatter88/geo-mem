@@ -53,7 +53,15 @@ Each target (Country or City) is tracked as an SRS card:
   - Score 40–59: Grade 2 (Fail, close)
   - Score 20–39: Grade 1 (Wrong region)
   - Score 0–19: Grade 0 (Complete blackout)
-- If $q \ge 3$, interval increases exponentially based on `easeFactor`; if $q < 3$, card resets to day 1 interval.
+
+### 2.4 Mobile & Desktop Responsiveness Architecture
+To ensure seamless parity between phone screens and desktop monitors:
+1. **Unified Pointer Events**: Using the modern `PointerEvent` API (`pointerdown`, `pointermove`, `pointerup`, `pointercancel`) rather than disparate `mouse*` / `touch*` events. This guarantees the 1.0s hold engine functions identically for mouse clicks, trackpads, touchscreens, and styluses.
+2. **Prevent Accidental Mobile Page Refresh**: Applying `overscroll-behavior-y: contain` to `html, body`. This blocks Chrome/Safari's pull-to-refresh gesture from reloading the page while spinning or panning the globe.
+3. **Gesture & Pinch-Zoom Isolation**: Applying `touch-action: pan-x pan-y` to the document and canvas so two-finger globe pinch-zooming operates smoothly without triggering browser-level document scaling.
+4. **Safe Area Insets**: Using CSS `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)` so HUD overlays and score drawers are never obscured by iPhone dynamic islands, notches, or Android system gesture bars.
+5. **Mobile Haptics**: Triggering `navigator.vibrate?.(50)` upon successful 1.0s pin drop for physical tactile feedback on mobile devices.
+6. **Adaptive HUD Layout**: Using responsive CSS units (`clamp()`, `rem`, and CSS variables) so HUD components automatically scale without clipping on compact 320px–390px mobile screens while staying elegant on widescreen desktop monitors.
 
 ---
 
