@@ -1,7 +1,11 @@
-import { afterNextRender, Component, ElementRef, OnDestroy, viewChild } from '@angular/core';
-
-import Globe, { GlobeInstance } from 'globe.gl'
-
+import {
+  Component,
+  ElementRef,
+  viewChild,
+  afterNextRender,
+  OnDestroy
+} from '@angular/core';
+import * as maplibreGl from 'maplibre-gl';
 
 @Component({
   selector: 'app-globe',
@@ -11,65 +15,63 @@ import Globe, { GlobeInstance } from 'globe.gl'
 })
 export class GlobeComponent implements OnDestroy {
   globeContainer = viewChild.required<ElementRef<HTMLDivElement>>('globeContainer');
-  private globeInstance: GlobeInstance | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-
+  private map: maplibreGl.Map | null = null;
 
   constructor() {
     afterNextRender(() => {
       this.initGlobe();
-      this.setupResizeHandler();
     });
   }
-  private initGlobe() {
+
+  private initGlobe(): void {
     const container = this.globeContainer().nativeElement;
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
 
-    this.globeInstance = new Globe(container)
-      .width(width)
-      .height(height)
-      // High-res physical/satellite imagery without borders or labels
-      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
-      .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
-      // MapTap-style cyan atmospheric glow
-      .showAtmosphere(true)
-      .atmosphereColor('#44f8fb')
-      .atmosphereAltitude(0.18);
-
-    // Initial camera viewpoint centered over Europe/Africa
-    this.globeInstance.pointOfView({ lat: 20, lng: 0, altitude: 2.2 }, 0);
-
-    // Tune OrbitControls for smooth inertia
-    const controls = this.globeInstance.controls();
-    if (controls) {
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.rotateSpeed = 0.8;
-      controls.zoomSpeed = 0.8;
-    }
-
-  }
-
-  private setupResizeHandler(): void {
-    const container = this.globeContainer().nativeElement;
-    this.resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (width > 0 && height > 0 && this.globeInstance) {
-          this.globeInstance.width(width).height(height);
-        }
-      }
+    // Initialize MapLibre with native 3D Globe Projection
+    this.map = new maplibreGl.Map({
+      container,
+      style: {
+        version: 8,
+        projection: {
+          type: 'globe' // Enables full 3D interactive sphere
+        },
+        sources: {
+          'esri-satellite': {
+            type: 'raster',
+            tiles: [
+              // 100% unlabelled, borderless high-resolution satellite imagery (zoom 0 to 19)
+              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256,
+            maxzoom: 19
+          }
+        },
+        layers: [
+          {
+            id: 'esri-satellite-layer',
+            type: 'raster',
+            source: 'esri-satellite',
+            minzoom: 0,
+            maxzoom: 22
+          }
+        ]
+      },
+      center: [0, 20],
+      zoom: 1.5,
+      minZoom: 1.2,
+      maxZoom: 16,
+      attributionControl: false // Keeps canvas clean of watermarks
     });
-    this.resizeObserver.observe(container);
+
+    // Handle container resizing
+    window.addEventListener('resize', this.onResize);
   }
+
+  private onResize = (): void => {
+    this.map?.resize();
+  };
 
   ngOnDestroy(): void {
-    this.resizeObserver?.disconnect();
-    if (this.globeInstance) {
-      this.globeInstance._destructor();
-    }
+    window.removeEventListener('resize', this.onResize);
+    this.map?.remove();
   }
-
 }

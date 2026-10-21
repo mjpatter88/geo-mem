@@ -11,7 +11,7 @@ A spaced-repetition web application to memorize the locations of countries and c
 | Layer | Recommended Choice | Rationale |
 | :--- | :--- | :--- |
 | **Frontend Framework** | **Angular 21** | Familiar to you, robust enterprise structure, modern Angular (Signals, standalone components, typed forms, modern control flow `@if` / `@for`). |
-| **3D Globe Provider** | **Globe.gl** (built on Three.js & Three-Globe) | **Best fit for this spec.** Provides an authentic 3D sphere that can be rendered completely blank (using a texture like NASA Blue Marble or Natural Earth physical landmass without political borders or labels). Offers built-in raycasting to map click events to exact `(lat, lng)`, touch/orbit gestures, and lightweight client-side polygon/pin rendering. Zero external tile server dependencies and no API key limits. |
+| **3D Globe Provider** | **MapLibre GL JS** (with 3D Globe Projection) | **Multi-level zoom without blurriness.** Natively streams unlabelled multi-resolution satellite tiles (ESRI World Imagery) from zoom level 0 down to zoom level 18+. Built-in smooth inertial rotation/zoom, accurate pointer-to-coordinate mapping (`e.lngLat`), and native GeoJSON layer rendering for pins, arcs, and country boundary highlights. |
 | **Backend & Database** | **Firebase** (Auth + Firestore + Hosting) | **No custom backend server needed.** All game logic, spatial validation, and SRS scheduling can run securely client-side in TypeScript. Cloud Firestore stores user attempt histories and SRS card states. Firebase Auth handles Google/Gmail sign-in. Firebase Hosting enables single-command deploys. |
 | **Spatial Engine** | **Turf.js** (`@turf/turf`) | Industry-standard spatial analysis in JavaScript. Fast client-side point-in-polygon checks (`booleanPointInPolygon`) and geodesics/distances (`distance`, `pointToLineDistance`). Runs in microseconds in the browser. |
 | **Geo Datasets** | **Natural Earth GeoJSON** | Free, public-domain vectors: 1:50m / 1:110m countries GeoJSON (~500KB compressed) and curated populated places / cities dataset (~1,000–3,000 cities with population rank, country, and coordinates). |
@@ -108,14 +108,14 @@ As requested, we will build this together step-by-step. In each step, I will pro
 - **Step 1.3**: Configure mobile-first viewport meta tags and touch gesture optimizations (preventing unwanted iOS/Android pull-to-refresh or text selection).
 
 ### Phase 2: The 3D Globe & Long-Press Interaction
-- **Step 2.1**: Integrate `globe.gl` / `three.js` inside an Angular component lifecycle (`afterNextRender` / `ngOnInit`).
-- **Step 2.2**: Configure the blank globe aesthetic (dark/light contrast, no labels, no boundaries, satellite/natural texture or minimalist vector polygon basemap).
+- **Step 2.1**: Install MapLibre GL JS (`maplibre-gl`).
+- **Step 2.2**: Configure `GlobeComponent` with MapLibre 3D Globe projection, unlabelled ESRI World Imagery raster tiles (streaming zoom 0 to 18), dark space background, and initial camera viewpoint.
 - **Step 2.3**: Build the **1-second Long-Press Directive**:
   - Touch/Pointer events (`pointerdown`, `pointermove`, `pointerup`, `pointercancel`).
   - Animated SVG radial circular progress ring following pointer.
   - Cancellation if dragged beyond small movement threshold.
   - Coordinates capture `(lat, lng)`.
-- **Step 2.4**: Validation: Render dropped pins and test globe responsiveness across desktop and mobile browsers.
+- **Step 2.4**: Validation: Render dropped pins, test deep multi-level zoom into coastlines and cities, and test responsiveness on mobile and desktop.
 
 ### Phase 3: Spatial Engine & Geographic Data Pipeline
 - **Step 3.1**: Curate country boundaries (GeoJSON) and city databases (Capitals + top global cities with populations & importance ranks).
@@ -166,7 +166,8 @@ As requested, we will build this together step-by-step. In each step, I will pro
 
 ## 5. Architectural Trade-offs & Recommendations
 
-1. **Globe.gl vs. MapLibre GL JS**:
-   - *Globe.gl* is recommended because it is truly built around displaying an unlabelled sphere with custom overlays and zero tile server bandwidth costs. MapLibre is great for maps, but stripping all vector tile labels and boundary lines from public tile servers requires custom vector tile styles or self-hosted tile infrastructure.
+1. **MapLibre GL JS 3D Globe vs. Static-Texture Spheres**:
+   - Single static texture globes (like Globe.gl's default) become blurry and pixelated when zooming into cities or narrow geographic features.
+   - MapLibre GL JS with 3D Globe projection natively streams multi-resolution raster tiles (LOD quadtree) on demand. By connecting to ESRI World Imagery, we get complete global satellite coverage with **zero political borders and zero text labels**, completely free, with crisp zoom down to street level.
 2. **Pure Client vs. Server**:
    - Everything required by this specification (spatial calculations, SRS, scoring) is lightweight enough to run 100% in the client. This keeps hosting completely free on Firebase tier, works with near-zero latency, and allows offline gameplay.
