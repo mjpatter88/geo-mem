@@ -1,0 +1,174 @@
+.game-layout {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    /* Allows pointer clicks to fall through to the globe canvas behind HUD */
+}
+
+/* Header HUD */
+.top-bar {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(var(--safe-top) + 1rem) 1.25rem 0.75rem;
+    z-index: 10;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .logo-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-cyan);
+        box-shadow: 0 0 10px var(--accent-cyan);
+    }
+
+    .logo-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        margin: 0;
+
+        .highlight {
+            color: var(--accent-cyan);
+        }
+    }
+}
+
+.mode-pill {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 0.35rem;
+    backdrop-filter: blur(8px);
+
+    .mode-label {
+        color: var(--text-muted);
+    }
+
+    .mode-name {
+        color: var(--accent-cyan);
+        font-weight: 600;
+    }
+}
+
+.icon-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+    }
+}
+
+/* Globe Container Viewport */
+.globe-viewport {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-globe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    opacity: 0.7;
+
+    .globe-preview-sphere {
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #1e3a5f, #0a1120 70%);
+        box-shadow: 0 0 50px rgba(68, 248, 251, 0.15), inset -10px -10px 40px rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(68, 248, 251, 0.2);
+    }
+
+    .placeholder-hint {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        letter-spacing: 0.05em;
+    }
+}
+
+/* Bottom HUD */
+.bottom-hud {
+    pointer-events: auto;
+    padding: 0 1.25rem calc(var(--safe-bottom) + 1.25rem);
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+}
+
+.target-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-cyan);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-cyan-glow);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 1rem 1.75rem;
+    text-align: center;
+    min-width: 260px;
+    max-width: 90vw;
+
+    .target-type {
+        display: block;
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .target-name {
+        font-size: 1.65rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+        color: #ffffff;
+        letter-spacing: 0.02em;
+    }
+
+    .instruction-text {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--accent-cyan);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+
+        .hint-bullet {
+            font-size: 0.6rem;
+        }
+    }
+}

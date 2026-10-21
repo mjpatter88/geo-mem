@@ -1,1 +1,51 @@
-/* You can add global styles to this file, and also import other style files */
+/* Design Tokens & Theme */
+:root {
+    --bg-space: #060913;
+    --bg-surface: rgba(15, 23, 42, 0.75);
+    --bg-surface-elevated: rgba(30, 41, 59, 0.85);
+
+    --accent-cyan: #44f8fb;
+    --accent-cyan-glow: rgba(68, 248, 251, 0.35);
+    --accent-green: #50dc78;
+    --accent-orange: #ff9d00;
+    --accent-red: #ff4d4d;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --border-cyan: rgba(68, 248, 251, 0.4);
+
+    --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Space Grotesk', monospace;
+
+    /* Safe Area Insets for Mobile Notches / Home Bars */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    /* Dynamic viewport height for mobile browser toolbars */
+    overflow: hidden;
+    background-color: var(--bg-space);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+
+    /* Mobile gestures: block pull-to-refresh and document bounce */
+    overscroll-behavior-y: contain;
+    touch-action: pan-x pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+}
