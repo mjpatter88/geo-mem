@@ -63,6 +63,13 @@ To ensure seamless parity between phone screens and desktop monitors:
 5. **Mobile Haptics**: Triggering `navigator.vibrate?.(50)` upon successful 1.0s pin drop for physical tactile feedback on mobile devices.
 6. **Adaptive HUD Layout**: Using responsive CSS units (`clamp()`, `rem`, and CSS variables) so HUD components automatically scale without clipping on compact 320px–390px mobile screens while staying elegant on widescreen desktop monitors.
 
+### 2.5 Realistic Zoom Limit Setting (MapTap Mode)
+- **Problem**: When zoomed in too far (zoom 12–18), urban streets, bridges, and building footprints become visible, making it too easy to recognize a city by its infrastructure rather than pure geographic recall.
+- **Solution (Configurable Setting)**:
+  - **Exploratory / Casual Mode**: `maxZoom: 16` (allows deep zoom to inspect islands, coastlines, and micro-geography).
+  - **Realistic Practice Mode (MapTap Parity)**: `maxZoom: 8.5` (restricts zoom level, showing natural geographic contours, rivers, and coastlines while keeping individual streets and buildings hidden).
+- **Implementation**: Dynamically toggled via `map.setMaxZoom(isRealistic ? 8.5 : 16)` and persisted in user preferences (`localStorage` and Firebase profile).
+
 ---
 
 ## 3. Data Schema (Cloud Firestore)
