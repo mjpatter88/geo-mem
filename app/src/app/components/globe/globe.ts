@@ -7,12 +7,14 @@ import {
 } from '@angular/core';
 import * as maplibreGl from 'maplibre-gl';
 import { MapMouseEvent, Marker } from 'maplibre-gl';
+import { HoldCompleteEvent, HoldToPlaceDirective } from '../../directives/hold-to-place';
 
 @Component({
   selector: 'app-globe',
   standalone: true,
   templateUrl: './globe.html',
   styleUrl: './globe.scss',
+  imports: [HoldToPlaceDirective]
 })
 export class GlobeComponent implements OnDestroy {
   globeContainer = viewChild.required<ElementRef<HTMLDivElement>>('globeContainer');
@@ -66,23 +68,22 @@ export class GlobeComponent implements OnDestroy {
 
     // Handle container resizing
     window.addEventListener('resize', this.onResize);
-
-    // Handle map click events
-    this.map.on('click', (e) => {
-      this.handleMapClick(e);
-    });
   }
 
-  private handleMapClick = (e: MapMouseEvent): void => {
-    console.log('Map clicked at:', e.lngLat);
+  onHoldComplete(e: HoldCompleteEvent): void {
+    if (!this.map) return;
+    // Unproject pixel {x, y} to geographical {lng, lat}
+    const lngLat = this.map.unproject([e.x, e.y]);
+    console.log('Placing marker at:', lngLat);
     if (this.currentMarker) {
-      this.currentMarker.setLngLat(e.lngLat);
+      this.currentMarker.setLngLat(lngLat);
     } else {
-      this.currentMarker = new Marker({
-        color: '#ffd4d4'
-      }).setLngLat(e.lngLat).addTo(this.map!);
+      this.currentMarker = new Marker({ color: '#ff4d4d' })
+        .setLngLat(lngLat)
+        .addTo(this.map);
     }
   }
+
 
   private onResize = (): void => {
     this.map?.resize();
