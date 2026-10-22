@@ -51,3 +51,110 @@ body {
     -webkit-user-select: none;
     user-select: none;
 }
+
+/* Neon Radial Hold Ring (MapTap style) */
+.hold-ring {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    margin-left: -50px;
+    margin-top: -50px;
+    pointer-events: none;
+    display: none;
+    z-index: 100;
+
+    &.visible {
+        display: block;
+    }
+
+    .hr-track {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.2);
+        stroke-width: 5;
+    }
+
+    .hr-fill {
+        fill: none;
+        stroke: var(--accent-cyan);
+        stroke-width: 5;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        stroke-dasharray: 289;
+        /* 2 * PI * 46 */
+        stroke-dashoffset: 289;
+        filter: drop-shadow(0 0 6px var(--accent-cyan));
+        transition: stroke 0.15s ease;
+    }
+
+    .hr-dot {
+        fill: var(--accent-cyan);
+        filter: drop-shadow(0 0 4px var(--accent-cyan));
+    }
+
+    /* Pop animation on hold completion */
+    &.completed {
+        animation: holdPop 0.22s ease-out;
+
+        .hr-fill,
+        .hr-dot {
+            stroke: var(--accent-green);
+            fill: var(--accent-green);
+            filter: drop-shadow(0 0 8px var(--accent-green));
+        }
+    }
+}
+
+/* Expanding Ping Ripple */
+.hold-ping {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    margin-left: -50px;
+    margin-top: -50px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-green);
+    box-shadow: 0 0 16px var(--accent-green);
+    pointer-events: none;
+    opacity: 0;
+    display: none;
+    z-index: 99;
+
+    &.animate {
+        display: block;
+        animation: pingRipple 0.45s ease-out forwards;
+    }
+}
+
+@keyframes holdPop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.18);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pingRipple {
+    0% {
+        transform: scale(0.6);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2.0);
+        opacity: 0;
+    }
+}
+
+/* Precision cursor while holding to drop a pin */
+.holding,
+.holding canvas,
+.holding * {
+    cursor: crosshair !important;
+}
