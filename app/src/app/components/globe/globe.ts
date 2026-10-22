@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   viewChild,
+  output,
   afterNextRender,
   OnDestroy
 } from '@angular/core';
@@ -20,6 +21,8 @@ export class GlobeComponent implements OnDestroy {
   globeContainer = viewChild.required<ElementRef<HTMLDivElement>>('globeContainer');
   private map: maplibreGl.Map | null = null;
   private currentMarker: Marker | null = null;
+
+  pinDropped = output<{ lng: number; lat: number }>();
 
   constructor() {
     afterNextRender(() => {
@@ -82,6 +85,9 @@ export class GlobeComponent implements OnDestroy {
         .setLngLat(lngLat)
         .addTo(this.map);
     }
+
+    // Emit the coordinates up to the parent.
+    this.pinDropped.emit({ lng: lngLat.lng, lat: lngLat.lat });
   }
 
 

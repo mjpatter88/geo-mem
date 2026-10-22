@@ -25,7 +25,7 @@
 
   <!-- Center Stage: The 3D Globe -->
   <main class="globe-viewport">
-    <app-globe></app-globe>
+    <app-globe (pinDropped)="onPinDropped($event)"></app-globe>
   </main>
 
   <!-- Bottom Target Prompt HUD -->
@@ -33,9 +33,15 @@
     <div class="target-card">
       <span class="target-type">Target Country</span>
       <h2 class="target-name">Madagascar</h2>
+      @if (lastPin(); as pin) {
+      <p class="instruction-text" style="color: var(--accent-green);">
+        <span class="hint-bullet">●</span> Pin at {{ pin.lat.toFixed(2) }}°, {{ pin.lng.toFixed(2) }}°
+      </p>
+      } @else {
       <p class="instruction-text">
         <span class="hint-bullet">●</span> Press &amp; hold for 1s to drop pin
       </p>
+      }
     </div>
   </footer>
 </div>
