@@ -6,6 +6,7 @@ import {
   OnDestroy
 } from '@angular/core';
 import * as maplibreGl from 'maplibre-gl';
+import { MapMouseEvent, Marker } from 'maplibre-gl';
 
 @Component({
   selector: 'app-globe',
@@ -16,6 +17,7 @@ import * as maplibreGl from 'maplibre-gl';
 export class GlobeComponent implements OnDestroy {
   globeContainer = viewChild.required<ElementRef<HTMLDivElement>>('globeContainer');
   private map: maplibreGl.Map | null = null;
+  private currentMarker: Marker | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -64,6 +66,22 @@ export class GlobeComponent implements OnDestroy {
 
     // Handle container resizing
     window.addEventListener('resize', this.onResize);
+
+    // Handle map click events
+    this.map.on('click', (e) => {
+      this.handleMapClick(e);
+    });
+  }
+
+  private handleMapClick = (e: MapMouseEvent): void => {
+    console.log('Map clicked at:', e.lngLat);
+    if (this.currentMarker) {
+      this.currentMarker.setLngLat(e.lngLat);
+    } else {
+      this.currentMarker = new Marker({
+        color: '#ffd4d4'
+      }).setLngLat(e.lngLat).addTo(this.map!);
+    }
   }
 
   private onResize = (): void => {
