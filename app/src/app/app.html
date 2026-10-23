@@ -31,8 +31,14 @@
   <!-- Bottom Target Prompt & Score HUD -->
   <footer class="bottom-hud">
     <div class="target-card">
+      @if (targetCity(); as city) {
+      <span class="target-type">Target City</span>
+      <h2 class="target-name">{{ city.name }} <span
+          style="font-size: 0.9rem; color: var(--text-dim); font-weight: 400;">({{ city.country }})</span></h2>
+      } @else {
       <span class="target-type">Target Country</span>
       <h2 class="target-name">{{ targetCountry() }}</h2>
+      }
 
       @if (evaluation(); as result) {
       @if (result.isInside) {
@@ -41,9 +47,18 @@
       </p>
       } @else {
       <p class="instruction-text" style="color: var(--accent-orange);">
-        <span class="hint-bullet">●</span> {{ result.score }} Pts — {{ result.distanceKm }} km away ({{
-        result.distanceMiles }} mi)
+        <span class="hint-bullet">●</span> {{ result.score }} Pts — {{ result.distanceMiles }} mi away ({{
+        result.distanceKm }} km)
       </p>
+      @if (result.isInRightCountry) {
+      <p class="instruction-text" style="color: var(--accent-green); font-size: 0.85rem; margin-top: 4px;">
+        ✓ Landed in the right country!
+      </p>
+      } @else if (result.guessedCountry) {
+      <p class="instruction-text" style="color: var(--text-dim); font-size: 0.85rem; margin-top: 4px;">
+        Landed in {{ result.guessedCountry }}
+      </p>
+      }
       }
       } @else {
       <p class="instruction-text">
@@ -51,6 +66,7 @@
       </p>
       }
     </div>
+
   </footer>
 
 </div>
