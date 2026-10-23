@@ -163,6 +163,14 @@ As requested, we will build this together step-by-step. In each step, I will pro
   - Daily review streak.
 - **Step 7.3**: "Weak Points" Analysis: Identify countries/cities with lowest average scores or highest distance errors.
 - **Step 7.4**: Interactive Mastery Map: Colorize the globe to show mastery level per country.
+- **Step 7.5**: **Data Explorer & Database Screen (Countries & Cities)**:
+  - Accessible via Settings menu / header navigation modal or route.
+  - Interactive, searchable, filterable, and sortable table of all loaded geography entities (241 countries, 1,249+ cities).
+  - **Filters & Sorting**: Filter by entity type (country vs. city), continent, country, capital status, importance rank, and SRS learning status (New, Due, Learning, Mastered). Sort by population, importance rank, average accuracy, distance error, or next review date.
+  - **Entity Metadata & Telemetry View**:
+    - Geographic info: Name, local name, continent, country, capital status, population, importance rank, coordinates.
+    - Performance & SRS stats: Lifetime attempts count, average score, average distance error, historical accuracy trend over time, current ease factor, repetition count, and next scheduled review timestamp.
+  - **Actions**: Direct "Practice on Globe" or "Inspect Target Location" buttons.
 
 ### Phase 8: Mobile Polish, PWA & Deployment
 - **Step 8.1**: Add PWA support (`@angular/pwa`) for full-screen offline-capable mobile experience.
