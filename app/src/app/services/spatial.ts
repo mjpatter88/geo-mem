@@ -20,10 +20,12 @@ export interface CityItem {
 }
 
 export interface EvaluationResult {
-  isInside: boolean;
+  isInside: boolean; // Inside country borders or within 10 miles of a city.
   distanceKm: number;
   distanceMiles: number;
   score: number; // 0 to 100
+  isInRightCountry?: boolean; // For city guessing, is guess inside right country.
+  guessedCountry?: string; // For city guessing, which country was guessed.
 }
 
 @Injectable({
@@ -70,6 +72,32 @@ export class SpatialService {
       return name === query;
     });
   }
+
+  /**
+   * Determine which country polygon (if any) contains the given coordinates.
+   */
+  getCountryAtPoint(lng: number, lat: number): GeoJSON.Feature | undefined {
+    const data = this.countries();
+    if (!data) return undefined;
+
+    const pt = turf.point([lng, lat]);
+    return data.features.find((f) => turf.booleanPointInPolygon(pt, f as any));
+  }
+
+  /**
+   * Look up a city by name (and optionally country)
+   */
+  getCity(cityName: string, countryName?: string): CityItem | undefined {
+    const queryCity = cityName.toLowerCase().trim();
+    const queryCountry = countryName?.toLowerCase().trim();
+
+    return this.cities().find((c) => {
+      const matchesCity = c.name.toLowerCase() === queryCity;
+      if (!queryCountry) return matchesCity;
+      return matchesCity && c.country.toLowerCase() === queryCountry;
+    });
+  }
+
 
   /**
    * Evaluates a guess against a target country:
@@ -134,4 +162,57 @@ export class SpatialService {
       score
     };
   }
+
+  /**
+ * Evaluates a guess against a target city:
+ * - 100 points if within 10 miles (16.1 km) of target coordinates
+ * - Quadratic SRS decay over 2,500 km
+ * - Identifies if the guess landed in the correct country
+ */
+  evaluateCityGuess(guessLng: number, guessLat: number, target: CityItem): EvaluationResult {
+    const guessPt = turf.point([guessLng, guessLat]);
+    const targetPt = turf.point([target.lng, target.lat]);
+
+    // Great-circle distance between guess and target city
+    const distanceKm = turf.distance(guessPt, targetPt, { units: 'kilometers' });
+    const distanceMiles = distanceKm * 0.621371;
+
+    // Check which country the user clicked in
+    const guessCountryFeature = this.getCountryAtPoint(guessLng, guessLat);
+    const guessCountryName = guessCountryFeature?.properties?.['name'];
+    const isSameCountry = !!(
+      guessCountryName &&
+      guessCountryName.toLowerCase() === target.country.toLowerCase()
+    );
+
+    // 10 miles (16.09 km) threshold for a direct hit
+    if (distanceMiles <= 10) {
+      return {
+        isInside: true,
+        distanceKm: Math.round(distanceKm),
+        distanceMiles: Math.round(distanceMiles),
+        score: 100,
+        isInRightCountry: isSameCountry,
+        guessedCountry: guessCountryName
+      };
+    }
+
+    // Quadratic decay starting outside the 10-mile radius, zeroing out at 2,500 km
+    const effectiveDistanceKm = Math.max(0, distanceKm - 16.0934);
+    const MAX_CITY_FAIL_KM = 2500;
+    let score = 0;
+    if (effectiveDistanceKm < MAX_CITY_FAIL_KM) {
+      score = Math.round(100 * Math.pow(1 - (effectiveDistanceKm / MAX_CITY_FAIL_KM), 2));
+    }
+
+    return {
+      isInside: false,
+      distanceKm: Math.round(distanceKm),
+      distanceMiles: Math.round(distanceMiles),
+      score: score,
+      isInRightCountry: isSameCountry,
+      guessedCountry: guessCountryName
+    };
+  }
+
 }
