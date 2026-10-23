@@ -35,8 +35,8 @@ A spaced-repetition web application to memorize the locations of countries and c
 #### Countries Mode
 - **Inside Border**: Score = **100**.
 - **Outside Border**: Calculated from distance $d$ (in km) to the nearest border point using Turf.js:
-  $$\text{Score} = \max\left(0, \text{round}\left(100 \times e^{-d / 1500}\right)\right)$$
-  *(Adjustable decay parameter: e.g., within 150 km ~ 90 pts, within 500 km ~ 71 pts, > 5000 km ~ 0 pts).*
+  $$\text{Score} = \begin{cases} \text{round}\left(100 \times \left(1 - \frac{d}{5000}\right)^2\right) & \text{if } d < 5000\text{ km} \\ 0 & \text{if } d \ge 5000\text{ km} \end{cases}$$
+  *(Balanced SRS memory curve: generous within 1,000 km, reaches 0 on wrong continent > 5,000 km).*
 
 #### Cities Mode
 - **Within Tolerance**: $\le 10\text{ miles}$ ($\sim 16.1\text{ km}$) = **100**.

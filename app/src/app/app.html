@@ -28,15 +28,23 @@
     <app-globe (pinDropped)="onPinDropped($event)"></app-globe>
   </main>
 
-  <!-- Bottom Target Prompt HUD -->
+  <!-- Bottom Target Prompt & Score HUD -->
   <footer class="bottom-hud">
     <div class="target-card">
       <span class="target-type">Target Country</span>
-      <h2 class="target-name">Madagascar</h2>
-      @if (lastPin(); as pin) {
-      <p class="instruction-text" style="color: var(--accent-green);">
-        <span class="hint-bullet">●</span> Pin at {{ pin.lat.toFixed(2) }}°, {{ pin.lng.toFixed(2) }}°
+      <h2 class="target-name">{{ targetCountry() }}</h2>
+
+      @if (evaluation(); as result) {
+      @if (result.isInside) {
+      <p class="instruction-text" style="color: var(--accent-green); font-weight: 700;">
+        <span class="hint-bullet">●</span> 100 Pts — Direct Hit! 🎉
       </p>
+      } @else {
+      <p class="instruction-text" style="color: var(--accent-orange);">
+        <span class="hint-bullet">●</span> {{ result.score }} Pts — {{ result.distanceKm }} km away ({{
+        result.distanceMiles }} mi)
+      </p>
+      }
       } @else {
       <p class="instruction-text">
         <span class="hint-bullet">●</span> Press &amp; hold for 1s to drop pin
@@ -44,4 +52,5 @@
       }
     </div>
   </footer>
+
 </div>
