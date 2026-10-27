@@ -155,17 +155,10 @@ As requested, we will build this together step-by-step. In each step, I will pro
   - Draw target pin or highlight true country boundary in green.
   - Draw connecting arc / geodesic line between guess and target showing distance error.
 
-### Phase 4: Core Quiz Modes & Atlas Exploration
+### Phase 4: Core Quiz Modes
 - **Step 4.1**: **Countries Mode**: Random / progression-based country identification.
 - **Step 4.2**: **Cities Mode**: Capital & major city identification with distance tolerance.
-- **Step 4.3**: **Continent/Country Filter Mode**: Allow player to filter targets by continent (e.g., "Africa Only") or cities within a specific country (e.g., "US Cities").
-- **Step 4.4**: Round Summary & Feedback Panel with immediate score, distance, and historical comparison.
-- **Step 4.5**: **Country Boundaries Overlay Toggle**: Add a vector border line layer for all countries loaded from `countries.geojson`, with reactive visibility toggling via the HUD and user preferences.
-- **Step 4.6**: **Explore / Atlas Mode**:
-  - Add `'explore'` game mode to browse all labeled countries and cities on the 3D globe.
-  - Render country name labels and city dot markers with text labels (dynamically scaled by zoom and importance rank).
-  - Interactive inspector card / popup on click to view entity details (population, capital, coordinates) and historical performance.
-  - Search & fly-to camera controls to search for any place and smoothly rotate to it.
+- **Step 4.3**: **Round Summary & Feedback Panel**: Immediate score, distance error display, session round summary, and camera auto-framing on feedback.
 
 ### Phase 5: Firebase Authentication & Cloud Storage
 - **Step 5.1**: Set up Firebase project & register web app.
@@ -200,6 +193,15 @@ As requested, we will build this together step-by-step. In each step, I will pro
 - **Step 8.1**: Add PWA support (`@angular/pwa`) for full-screen offline-capable mobile experience.
 - **Step 8.2**: Performance audit (bundle size, WebGL memory cleanup on view navigation).
 - **Step 8.3**: Deploy to Firebase Hosting.
+
+### Phase 9: Future Improvements
+- **Step 9.1**: **Continent/Country Filter Mode**: Allow player to filter targets by continent (e.g., "Africa Only") or cities within a specific country (e.g., "US Cities").
+- **Step 9.2**: **Country Boundaries Overlay Toggle**: Add a vector border line layer for all countries loaded from `countries.geojson`, with reactive visibility toggling via the HUD and user preferences.
+- **Step 9.3**: **Explore / Atlas Mode**:
+  - Add `'explore'` game mode to browse all labeled countries and cities on the 3D globe.
+  - Render country name labels and city dot markers with text labels (dynamically scaled by zoom and importance rank).
+  - Interactive inspector card / popup on click to view entity details (population, capital, coordinates) and historical performance.
+  - Search & fly-to camera controls to search for any place and smoothly rotate to it.
 
 ---
 
