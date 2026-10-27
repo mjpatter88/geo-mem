@@ -45,26 +45,6 @@
     }
 }
 
-.mode-pill {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
-    font-size: 0.85rem;
-    display: flex;
-    gap: 0.35rem;
-    backdrop-filter: blur(8px);
-
-    .mode-label {
-        color: var(--text-muted);
-    }
-
-    .mode-name {
-        color: var(--accent-cyan);
-        font-weight: 600;
-    }
-}
-
 .icon-btn {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
@@ -96,29 +76,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.placeholder-globe {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    opacity: 0.7;
-
-    .globe-preview-sphere {
-        width: 240px;
-        height: 240px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 35%, #1e3a5f, #0a1120 70%);
-        box-shadow: 0 0 50px rgba(68, 248, 251, 0.15), inset -10px -10px 40px rgba(0, 0, 0, 0.8);
-        border: 1px solid rgba(68, 248, 251, 0.2);
-    }
-
-    .placeholder-hint {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        letter-spacing: 0.05em;
-    }
 }
 
 /* Bottom HUD */

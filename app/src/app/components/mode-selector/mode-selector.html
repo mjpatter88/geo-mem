@@ -1,0 +1,13 @@
+<div class="mode-toggle-group" role="group" aria-label="Game Mode">
+    <button type="button" class="mode-btn" [class.active]="gameService.mode() === 'cities'"
+        (click)="selectMode('cities')">
+        Cities
+    </button>
+
+    <button type="button" class="mode-btn" [class.active]="gameService.mode() === 'countries'"
+        (click)="selectMode('countries')">
+        Countries
+    </button>
+
+    <span class="round-badge">Round: {{ gameService.currentRound() }}</span>
+</div>

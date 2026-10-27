@@ -6,12 +6,7 @@
       <h1 class="logo-text">GEO<span class="highlight">MEM</span></h1>
     </div>
 
-    <div class="mode-pill">
-      <span class="mode-label">Mode:</span>
-      <span class="mode-name" style="text-transform: capitalize;">{{ gameService.mode() }}</span>
-      <span class="mode-label">Round:</span>
-      <span class="mode-name">{{ gameService.currentRound() }}</span>
-    </div>
+    <app-mode-selector (modeChanged)="onModeChanged($event)"></app-mode-selector>
 
     <div class="user-action">
       <button class="icon-btn" aria-label="Settings">

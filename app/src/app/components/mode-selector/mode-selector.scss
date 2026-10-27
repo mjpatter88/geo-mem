@@ -1,0 +1,41 @@
+.mode-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(8px);
+    padding: 3px;
+    border-radius: 9999px;
+    gap: 2px;
+}
+
+.mode-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.3rem 0.85rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+        color: var(--text-primary);
+    }
+
+    &.active {
+        background: var(--accent-cyan);
+        color: var(--bg-space);
+        box-shadow: 0 0 12px var(--accent-cyan-glow);
+    }
+}
+
+.round-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 0 0.6rem 0 0.3rem;
+    letter-spacing: 0.05em;
+}

@@ -1,17 +1,16 @@
 import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { GlobeComponent } from './components/globe/globe';
-import { CityItem, EvaluationResult, SpatialService } from './services/spatial';
-import { GameService } from './services/game';
+import { GameMode, GameService } from './services/game';
+import { ModeSelectorComponent } from './components/mode-selector/mode-selector';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [GlobeComponent],
+  imports: [GlobeComponent, ModeSelectorComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  private spatialService = inject(SpatialService);
   protected gameService = inject(GameService);
   private globe = viewChild(GlobeComponent);
 
@@ -49,4 +48,11 @@ export class App {
     this.gameService.currentRound.update(r => r + 1);
     this.gameService.nextRound();
   }
+
+  onModeChanged(newMode: GameMode): void {
+    this.globe()?.clearFeedback();
+    this.lastPin.set(null);
+    this.gameService.setMode(newMode);
+  }
+
 }
