@@ -1,6 +1,7 @@
 import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { GlobeComponent } from './components/globe/globe';
 import { CityItem, EvaluationResult, SpatialService } from './services/spatial';
+import { GameService } from './services/game';
 
 @Component({
   selector: 'app-root',
@@ -11,44 +12,41 @@ import { CityItem, EvaluationResult, SpatialService } from './services/spatial';
 })
 export class App {
   private spatialService = inject(SpatialService);
+  protected gameService = inject(GameService);
   private globe = viewChild(GlobeComponent);
 
   protected readonly title = signal('app');
 
-  targetCountry = signal('Madagascar');
-  targetCity = signal<CityItem | null>(null);
-
   lastPin = signal<{ lng: number; lat: number } | null>(null);
-  evaluation = signal<EvaluationResult | null>(null);
 
-  constructor() {
-    // Once spatial data loads, pick Tokyo for temporary testing
-    effect(() => {
-      if (this.spatialService.isLoaded()) {
-        const tokyo = this.spatialService.getCity('Tokyo', 'Japan');
-        if (tokyo) this.targetCity.set(tokyo);
-      }
-    });
-  }
+  targetCity = this.gameService.targetCity;
+  targetCountry = this.gameService.targetCountry;
+  evaluation = this.gameService.currentEvaluation;
+
+  constructor() { }
 
   onPinDropped(coords: { lng: number; lat: number }): void {
-    this.lastPin.set(coords);
-
-    let result: EvaluationResult;
-    if (this.targetCity()) {
-      const city = this.targetCity()!;
-      result = this.spatialService.evaluateCityGuess(coords.lng, coords.lat, city);
-      this.globe()?.showCityFeedback(coords, { lng: city.lng, lat: city.lat });
-    } else {
-      result = this.spatialService.evaluateCountryGuess(coords.lng, coords.lat, this.targetCountry());
-      const countryFeature = this.spatialService.getCountryFeature(this.targetCountry());
-      if (countryFeature) {
-        this.globe()?.showCountryFeedback(coords, countryFeature);
-      }
+    if (this.gameService.roundState() == 'evaluated') {
+      return;
     }
 
-    this.evaluation.set(result);
+    this.lastPin.set(coords);
 
-    console.log('Evaluation Result: ', result);
+    const result = this.gameService.submitGuess(coords);
+    console.log('Guess Result: ', result);
+
+    if (result.feedbackData.type === 'city') {
+      const cityCoordinates = result.feedbackData.coords;
+      this.globe()?.showCityFeedback(coords, cityCoordinates);
+    } else if (result.feedbackData.feature) {
+      this.globe()?.showCountryFeedback(coords, result.feedbackData.feature);
+    }
+  }
+
+  onNextRound(): void {
+    this.globe()?.clearFeedback();
+    this.lastPin.set(null);
+    this.gameService.currentRound.update(r => r + 1);
+    this.gameService.nextRound();
   }
 }

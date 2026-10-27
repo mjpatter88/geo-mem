@@ -8,7 +8,9 @@
 
     <div class="mode-pill">
       <span class="mode-label">Mode:</span>
-      <span class="mode-name">Countries</span>
+      <span class="mode-name" style="text-transform: capitalize;">{{ gameService.mode() }}</span>
+      <span class="mode-label">Round:</span>
+      <span class="mode-name">{{ gameService.currentRound() }}</span>
     </div>
 
     <div class="user-action">
@@ -60,6 +62,10 @@
       </p>
       }
       }
+      <!-- Next Location Button -->
+      <button class="next-btn" (click)="onNextRound()">
+        Next Location &rarr;
+      </button>
       } @else {
       <p class="instruction-text">
         <span class="hint-bullet">●</span> Press &amp; hold for 1s to drop pin

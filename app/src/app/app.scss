@@ -171,4 +171,35 @@
             font-size: 0.6rem;
         }
     }
+
+    .next-btn {
+        margin-top: 0.85rem;
+        width: 100%;
+        padding: 0.6rem 1.25rem;
+        background: var(--accent-cyan);
+        color: var(--bg-space);
+        border: none;
+        border-radius: 9999px;
+        font-family: var(--font-main);
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 0 15px var(--accent-cyan-glow);
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 25px var(--accent-cyan-glow);
+        }
+
+        &:active {
+            transform: translateY(1px);
+        }
+    }
+
 }
