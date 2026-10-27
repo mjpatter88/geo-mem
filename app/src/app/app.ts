@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { GlobeComponent } from './components/globe/globe';
 import { CityItem, EvaluationResult, SpatialService } from './services/spatial';
 
@@ -11,6 +11,7 @@ import { CityItem, EvaluationResult, SpatialService } from './services/spatial';
 })
 export class App {
   private spatialService = inject(SpatialService);
+  private globe = viewChild(GlobeComponent);
 
   protected readonly title = signal('app');
 
@@ -35,9 +36,15 @@ export class App {
 
     let result: EvaluationResult;
     if (this.targetCity()) {
-      result = this.spatialService.evaluateCityGuess(coords.lng, coords.lat, this.targetCity()!);
+      const city = this.targetCity()!;
+      result = this.spatialService.evaluateCityGuess(coords.lng, coords.lat, city);
+      this.globe()?.showCityFeedback(coords, { lng: city.lng, lat: city.lat });
     } else {
       result = this.spatialService.evaluateCountryGuess(coords.lng, coords.lat, this.targetCountry());
+      const countryFeature = this.spatialService.getCountryFeature(this.targetCountry());
+      if (countryFeature) {
+        this.globe()?.showCountryFeedback(coords, countryFeature);
+      }
     }
 
     this.evaluation.set(result);

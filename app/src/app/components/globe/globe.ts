@@ -7,6 +7,7 @@ import {
   OnDestroy
 } from '@angular/core';
 import * as maplibreGl from 'maplibre-gl';
+import * as turf from '@turf/turf';
 import { MapMouseEvent, Marker } from 'maplibre-gl';
 import { HoldCompleteEvent, HoldToPlaceDirective } from '../../directives/hold-to-place';
 
@@ -21,6 +22,7 @@ export class GlobeComponent implements OnDestroy {
   globeContainer = viewChild.required<ElementRef<HTMLDivElement>>('globeContainer');
   private map: maplibreGl.Map | null = null;
   private currentMarker: Marker | null = null;
+  private targetMarker: Marker | null = null;
 
   pinDropped = output<{ lng: number; lat: number }>();
 
@@ -32,6 +34,8 @@ export class GlobeComponent implements OnDestroy {
 
   private initGlobe(): void {
     const container = this.globeContainer().nativeElement;
+
+    maplibreGl.setWorkerUrl(new URL('maplibre-gl-worker.mjs', document.baseURI).href);
 
     // Initialize MapLibre with native 3D Globe Projection
     this.map = new maplibreGl.Map({
@@ -46,10 +50,20 @@ export class GlobeComponent implements OnDestroy {
             type: 'raster',
             tiles: [
               // 100% unlabelled, borderless high-resolution satellite imagery (zoom 0 to 19)
-              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
             ],
             tileSize: 256,
             maxzoom: 19
+          },
+          // 1. Source for target country boundary
+          'target-polygon': {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+          },
+          // 2. Source for geodesic great-circle flight arc
+          'guess-arc': {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
           }
         },
         layers: [
@@ -59,6 +73,38 @@ export class GlobeComponent implements OnDestroy {
             source: 'esri-satellite',
             minzoom: 0,
             maxzoom: 22
+          },
+          // Translucent emerald green fill inside the country
+          {
+            id: 'target-polygon-fill',
+            type: 'fill',
+            source: 'target-polygon',
+            paint: {
+              'fill-color': '#10b981',
+              'fill-opacity': 0.35
+            }
+          },
+          // Crisp neon emerald border
+          {
+            id: 'target-polygon-outline',
+            type: 'line',
+            source: 'target-polygon',
+            paint: {
+              'line-color': '#34d399',
+              'line-width': 2.5
+            }
+          },
+          // Dashed amber flight path arc between guess and target
+          {
+            id: 'guess-arc-line',
+            type: 'line',
+            source: 'guess-arc',
+            paint: {
+              'line-color': '#fbbf24',
+              'line-width': 3.5,
+              'line-dasharray': [2, 2],
+              'line-opacity': 0.9
+            }
           }
         ]
       },
@@ -76,7 +122,7 @@ export class GlobeComponent implements OnDestroy {
   onHoldComplete(e: HoldCompleteEvent): void {
     if (!this.map) return;
     // Unproject pixel {x, y} to geographical {lng, lat}
-    const lngLat = this.map.unproject([e.x, e.y]);
+    const lngLat = this.map.unproject([e.x, e.y]).wrap();
     console.log('Placing marker at:', lngLat);
     if (this.currentMarker) {
       this.currentMarker.setLngLat(lngLat);
@@ -90,6 +136,87 @@ export class GlobeComponent implements OnDestroy {
     this.pinDropped.emit({ lng: lngLat.lng, lat: lngLat.lat });
   }
 
+  /**
+ * Highlights the target country polygon and draws an arc from the guess pin
+ */
+  showCountryFeedback(guessCoords: { lng: number; lat: number }, countryFeature: GeoJSON.Feature): void {
+    if (!this.map) return;
+
+    // 1. Highlight target country polygon
+    const countrySource = this.map.getSource('target-polygon') as maplibreGl.GeoJSONSource;
+    countrySource?.setData(countryFeature);
+
+    // 2. Draw great-circle arc to country center if guess was outside
+    const center = turf.pointOnFeature(countryFeature as any);
+    const [targetLng, targetLat] = center.geometry.coordinates;
+
+    const guessPt = turf.point([guessCoords.lng, guessCoords.lat]);
+    const targetPt = turf.point([targetLng, targetLat]);
+
+    const distance = turf.distance(guessPt, targetPt, { units: 'kilometers' });
+    const arcSource = this.map.getSource('guess-arc') as maplibreGl.GeoJSONSource;
+    if (distance > 20) {
+      const arc = turf.greatCircle(guessPt, targetPt, { npoints: 60 });
+      arcSource?.setData(arc as any);
+    } else {
+      arcSource?.setData({ type: 'FeatureCollection', features: [] });
+    }
+  }
+
+  /**
+   * Drops a green target marker on the city and draws an arc from the guess pin
+   */
+  showCityFeedback(guessCoords: { lng: number; lat: number }, targetCoords: { lng: number; lat: number }): void {
+    if (!this.map) return;
+
+    // 1. Place green target marker
+    if (this.targetMarker) {
+      this.targetMarker.setLngLat(targetCoords);
+    } else {
+      this.targetMarker = new Marker({ color: '#10b981' })
+        .setLngLat(targetCoords)
+        .addTo(this.map);
+    }
+
+    // 2. Draw great-circle arc from user pin to city
+    const guessPt = turf.point([guessCoords.lng, guessCoords.lat]);
+    const targetPt = turf.point([targetCoords.lng, targetCoords.lat]);
+
+    const distance = turf.distance(guessPt, targetPt, { units: 'kilometers' });
+    const arcSource = this.map.getSource('guess-arc') as maplibreGl.GeoJSONSource;
+    if (distance > 10) {
+      const arc = turf.greatCircle(guessPt, targetPt, { npoints: 60 });
+      console.log('Drawing arc:', { distance, arcSource: !!arcSource, arc });
+      arcSource?.setData({
+        type: 'FeatureCollection',
+        features: [arc]
+      });
+    } else {
+      arcSource?.setData({ type: 'FeatureCollection', features: [] });
+    }
+  }
+
+  /**
+   * Clears all feedback layers and markers for the next round
+   */
+  clearFeedback(): void {
+    if (!this.map) return;
+
+    const countrySource = this.map.getSource('target-polygon') as maplibreGl.GeoJSONSource;
+    countrySource?.setData({ type: 'FeatureCollection', features: [] });
+
+    const arcSource = this.map.getSource('guess-arc') as maplibreGl.GeoJSONSource;
+    arcSource?.setData({ type: 'FeatureCollection', features: [] });
+
+    if (this.currentMarker) {
+      this.currentMarker.remove();
+      this.currentMarker = null;
+    }
+    if (this.targetMarker) {
+      this.targetMarker.remove();
+      this.targetMarker = null;
+    }
+  }
 
   private onResize = (): void => {
     this.map?.resize();
