@@ -70,6 +70,24 @@ To ensure seamless parity between phone screens and desktop monitors:
   - **Realistic Practice Mode (MapTap Parity)**: `maxZoom: 8.5` (restricts zoom level, showing natural geographic contours, rivers, and coastlines while keeping individual streets and buildings hidden).
 - **Implementation**: Dynamically toggled via `map.setMaxZoom(isRealistic ? 8.5 : 16)` and persisted in user preferences (`localStorage` and Firebase profile).
 
+### 2.6 Country Boundaries Overlay Toggle
+- **Concept**: A quick visual toggle allowing users to switch between a completely blank, unlabelled satellite globe and a globe with subtle country border vector outlines.
+- **Use Cases**:
+  - **Practice Scaffolding**: Helps beginners learn shapes and borders without revealing labels.
+  - **Inspection / Verification**: Allows players to check regional borders without exiting the quiz.
+- **Implementation**:
+  - Persistent GeoJSON line layer in MapLibre powered by `countries.geojson`.
+  - Toggled dynamically via `map.setLayoutProperty('all-country-boundaries', 'visibility', visible ? 'visible' : 'none')`.
+  - Controlled via an icon button in the header HUD / settings and persisted in user preferences.
+
+### 2.7 Explore / Atlas Mode (Interactive Labeled Globe)
+- **Concept**: A non-timed, non-scored exploration mode where users can freely browse and study every country and city in the database directly on the 3D globe.
+- **Features**:
+  - **All Country Borders & Labels**: Crisp boundary lines and country names placed at geographic centers.
+  - **All Cities Mapped & Labeled**: Every city in `cities.json` rendered with a styled dot marker and typography label, dynamically filtering density by zoom level and `importanceRank`.
+  - **Interactive Inspection**: Clicking/tapping any country or city opens an inspector card displaying its metadata (population, capital status, coordinates, continent) and user learning statistics (lifetime attempts, accuracy, SRS mastery level).
+  - **Search & Fly-To**: Search bar allowing players to type any city or country and smoothly animate the globe camera to its location.
+
 ---
 
 ## 3. Data Schema (Cloud Firestore)
@@ -137,11 +155,17 @@ As requested, we will build this together step-by-step. In each step, I will pro
   - Draw target pin or highlight true country boundary in green.
   - Draw connecting arc / geodesic line between guess and target showing distance error.
 
-### Phase 4: Core Quiz Modes
+### Phase 4: Core Quiz Modes & Atlas Exploration
 - **Step 4.1**: **Countries Mode**: Random / progression-based country identification.
 - **Step 4.2**: **Cities Mode**: Capital & major city identification with distance tolerance.
 - **Step 4.3**: **Continent/Country Filter Mode**: Allow player to filter targets by continent (e.g., "Africa Only") or cities within a specific country (e.g., "US Cities").
 - **Step 4.4**: Round Summary & Feedback Panel with immediate score, distance, and historical comparison.
+- **Step 4.5**: **Country Boundaries Overlay Toggle**: Add a vector border line layer for all countries loaded from `countries.geojson`, with reactive visibility toggling via the HUD and user preferences.
+- **Step 4.6**: **Explore / Atlas Mode**:
+  - Add `'explore'` game mode to browse all labeled countries and cities on the 3D globe.
+  - Render country name labels and city dot markers with text labels (dynamically scaled by zoom and importance rank).
+  - Interactive inspector card / popup on click to view entity details (population, capital, coordinates) and historical performance.
+  - Search & fly-to camera controls to search for any place and smoothly rotate to it.
 
 ### Phase 5: Firebase Authentication & Cloud Storage
 - **Step 5.1**: Set up Firebase project & register web app.
