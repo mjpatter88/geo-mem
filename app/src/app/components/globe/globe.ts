@@ -216,6 +216,9 @@ export class GlobeComponent implements OnDestroy {
       this.targetMarker.remove();
       this.targetMarker = null;
     }
+    if (this.map && this.map.getZoom() > 2.5) {
+      this.map.easeTo({ zoom: 2.8, duration: 800 });
+    }
   }
 
   private onResize = (): void => {
