@@ -9,5 +9,12 @@
         Countries
     </button>
 
-    <span class="round-badge">Round: {{ gameService.currentRound() }}</span>
+    <div class="stats-group">
+        <span class="stat-badge">Round: {{ gameService.currentRound() }}</span>
+        @if (gameService.sessionHistory().length > 0) {
+        <span class="stat-divider">•</span>
+        <span class="stat-badge score">Avg {{ gameService.averageScore() }}%</span>
+        }
+    </div>
+
 </div>
