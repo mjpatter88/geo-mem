@@ -28,6 +28,12 @@ export interface EvaluationResult {
   guessedCountry?: string; // For city guessing, which country was guessed.
 }
 
+export interface CameraFraming {
+  center: [lng: number, lat: number];
+  zoom: number;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -215,4 +221,33 @@ export class SpatialService {
     };
   }
 
+  getCountryCenter(countryFeature: GeoJSON.Feature): { lng: number, lat: number } {
+    const center = turf.pointOnFeature(countryFeature as any);
+    return {
+      lng: center.geometry.coordinates[0],
+      lat: center.geometry.coordinates[1]
+    };
+  }
+
+  calculateCameraFraming(
+    guessCoords: { lng: number; lat: number },
+    targetCoords: { lng: number; lat: number }
+  ): CameraFraming {
+    const guessPt = turf.point([guessCoords.lng, guessCoords.lat]);
+    const targetPt = turf.point([targetCoords.lng, targetCoords.lat]);
+    const distanceKm = turf.distance(guessPt, targetPt, { units: 'kilometers' });
+    const mid = turf.midpoint(guessPt, targetPt);
+    const [midLng, midLat] = mid.geometry.coordinates;
+    let zoom = 1.5;
+    if (distanceKm < 50) zoom = 6;
+    else if (distanceKm < 200) zoom = 5;
+    else if (distanceKm < 800) zoom = 4;
+    else if (distanceKm < 2500) zoom = 3;
+    else if (distanceKm < 6000) zoom = 2.2;
+    else zoom = 1.5;
+    return {
+      center: [midLng, midLat],
+      zoom
+    };
+  }
 }

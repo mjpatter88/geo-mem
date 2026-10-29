@@ -4,12 +4,14 @@ import {
   viewChild,
   output,
   afterNextRender,
-  OnDestroy
+  OnDestroy,
+  inject
 } from '@angular/core';
 import * as maplibreGl from 'maplibre-gl';
 import * as turf from '@turf/turf';
 import { MapMouseEvent, Marker } from 'maplibre-gl';
 import { HoldCompleteEvent, HoldToPlaceDirective } from '../../directives/hold-to-place';
+import { SpatialService } from '../../services/spatial';
 
 @Component({
   selector: 'app-globe',
@@ -19,6 +21,7 @@ import { HoldCompleteEvent, HoldToPlaceDirective } from '../../directives/hold-t
   imports: [HoldToPlaceDirective]
 })
 export class GlobeComponent implements OnDestroy {
+  private spatialService = inject(SpatialService);
   globeContainer = viewChild.required<ElementRef<HTMLDivElement>>('globeContainer');
   private map: maplibreGl.Map | null = null;
   private currentMarker: Marker | null = null;
@@ -161,6 +164,9 @@ export class GlobeComponent implements OnDestroy {
     } else {
       arcSource?.setData({ type: 'FeatureCollection', features: [] });
     }
+    const targetCoords = this.spatialService.getCountryCenter(countryFeature);
+    this.flyToFraming(guessCoords, targetCoords);
+
   }
 
   /**
@@ -194,6 +200,8 @@ export class GlobeComponent implements OnDestroy {
     } else {
       arcSource?.setData({ type: 'FeatureCollection', features: [] });
     }
+
+    this.flyToFraming(guessCoords, targetCoords);
   }
 
   /**
@@ -220,6 +228,19 @@ export class GlobeComponent implements OnDestroy {
       this.map.easeTo({ zoom: 2.8, duration: 800 });
     }
   }
+
+  private flyToFraming(guessCoords: { lng: number; lat: number }, targetCoords: { lng: number; lat: number }): void {
+    if (!this.map) return;
+    const { center, zoom } = this.spatialService.calculateCameraFraming(guessCoords, targetCoords);
+
+    this.map.flyTo({
+      center,
+      zoom,
+      duration: 1200,
+      essential: true
+    });
+  }
+
 
   private onResize = (): void => {
     this.map?.resize();
