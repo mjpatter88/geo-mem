@@ -2,6 +2,7 @@ import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { GlobeComponent } from './components/globe/globe';
 import { GameMode, GameService } from './services/game';
 import { ModeSelectorComponent } from './components/mode-selector/mode-selector';
+import { AuthService } from './services/auth';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,7 @@ import { ModeSelectorComponent } from './components/mode-selector/mode-selector'
   styleUrl: './app.scss'
 })
 export class App {
+  protected authService = inject(AuthService);
   protected gameService = inject(GameService);
   private globe = viewChild(GlobeComponent);
 
