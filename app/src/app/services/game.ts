@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { CityItem, EvaluationResult, SpatialService } from './spatial';
+import { StatsService } from './stats';
 
 export type GameMode = 'countries' | 'cities';
 
@@ -16,6 +17,7 @@ export interface RoundRecord {
 })
 export class GameService {
   private spatialService = inject(SpatialService);
+  private statsService = inject(StatsService);
 
   readonly mode = signal<GameMode>('cities');
   readonly roundState = signal<'guessing' | 'evaluated'>('guessing');
@@ -102,6 +104,34 @@ export class GameService {
       }
     ]);
 
+    const targetCoords = feedbackData.type === 'city'
+      ? feedbackData.coords
+      : (feedbackData.feature ? this.spatialService.getCountryCenter(feedbackData.feature) : undefined);
+
+    const city = this.targetCity();
+    const country = this.targetCountry();
+    const itemId = city
+      ? generateItemId('cities', city.name, city.country)
+      : generateItemId('countries', country ?? '');
+
+    this.statsService.recordAttempt({
+      itemId,
+      mode: this.mode(),
+      targetName: (this.targetCity()?.name || this.targetCountry()) ?? '',
+      targetCoords,
+      guessCoords: coords,
+      evaluation: result
+    });
+
+
     return { result, feedbackData };
   }
 }
+
+function generateItemId(mode: GameMode, name: string, country?: string): string {
+  const sanitize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return mode === 'cities'
+    ? `city_${sanitize(name)}_${sanitize(country || '')}`
+    : `country_${sanitize(name)}`;
+}
+
